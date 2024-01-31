@@ -1,0 +1,15 @@
+services:
+  db:
+    image: mongo:5.0
+    container_name: mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - mongodbdata:/data/db
+    ports:
+      - "27017:27017"
+
+volumes:
+  mongodbdata:
+    driver: local

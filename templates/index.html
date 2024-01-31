@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="../static/styles.css" />
+    <title>GoodNotes</title>
+  </head>
+  <body>
+    <h1>🗒️ GoodNotes 🗒️</h1>
+
+    <!-- Form for adding a new note -->
+    <form action="/add-note" method="post">
+      <label for="content">Note Content:</label>
+      <input type="text" id="content" name="content" required />
+
+      <label for="category">Category:</label>
+      <select id="category" name="category" required>
+        {% for category in categories %}
+        <option value="{{ category.id }}">{{ category.name }}</option>
+        {% endfor %}
+      </select>
+
+      <button type="submit">Add Note</button>
+    </form>
+
+    <!-- Existing notes -->
+    {% for note in notes %}
+    <div class="note-row">
+      <div class="note-content">{{ note.content }}</div>
+      <div class="note-actions">
+        <!-- Toggle Update Form -->
+        <button
+          type="button"
+          onclick="toggleUpdateForm('update-form-{{ note.id }}')"
+        >
+          Update
+        </button>
+
+        <!-- Update Form (initially hidden) -->
+        <form
+          id="update-form-{{ note.id }}"
+          action="/update/{{ note.id }}"
+          method="post"
+          style="display: none"
+        >
+          <input
+            type="text"
+            name="updated_content"
+            value="{{ note.content }}"
+            required
+          />
+          <button type="submit">Save</button>
+        </form>
+        <form action="/complete/{{ note.id }}" method="post">
+          <input type="hidden" name="note_id" value="{{ note.id }}" />
+          <button type="submit">Complete</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+
+    <script>
+      function toggleUpdateForm(formId) {
+        var form = document.getElementById(formId);
+        if (form.style.display === "none") {
+          form.style.display = "block";
+        } else {
+          form.style.display = "none";
+        }
+      }
+    </script>
+  </body>
+</html>
