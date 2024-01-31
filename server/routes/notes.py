@@ -36,9 +36,11 @@ async def create_category(category: Category) -> Category:
     "/add-note", response_description="Add new note", response_class=RedirectResponse
 )
 async def create_note(
-    content: Annotated[str, Form(...)], category: Annotated[str, Form(...)]
-) -> Note:
-    find_category = await Category.find_one(Category.name == category)
+    request: Request,
+    content: Annotated[str, Form(...)],
+    category_id: Annotated[PydanticObjectId, Form(...)],
+) -> RedirectResponse:
+    category = await Category.get(category_id)
 
     if not category:
         raise HTTPException(
@@ -46,8 +48,9 @@ async def create_note(
             detail="Category does not exist",
         )
 
-    new_note = Note(content=content, category=find_category)
+    new_note = Note(content=content, category=category)
     await new_note.insert()
+    print(new_note)
     return RedirectResponse("/", status_code=status.HTTP_303_SEE_OTHER)
 
 
@@ -56,7 +59,7 @@ async def create_note(
     response_description="Complete note",
     response_class=RedirectResponse,
 )
-async def delete_note(id: PydanticObjectId) -> Note:
+async def delete_note(id: PydanticObjectId) -> RedirectResponse:
     note = await Note.get(id)
 
     if not note:
@@ -74,7 +77,7 @@ async def delete_note(id: PydanticObjectId) -> Note:
 async def update_note(
     updated_content: Annotated[str, Form(...)],
     id: PydanticObjectId,
-) -> Note:
+) -> RedirectResponse:
     note = await Note.get(id)
 
     if not note:
@@ -84,3 +87,34 @@ async def update_note(
 
     await note.set({Note.content: updated_content})
     return RedirectResponse("/", status_code=status.HTTP_303_SEE_OTHER)
+
+
+@router.get(
+    "/filter",
+    response_description="Filter notes by category",
+    response_class=RedirectResponse,
+)
+async def filter_notes(request: Request, id: PydanticObjectId) -> RedirectResponse:
+    category = await Category.get(id)
+
+    if not category:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"Category {id} not found"
+        )
+
+    notes = await Note.find(Note.category.id == category.id).to_list()
+
+    notes_for_template = [
+        {"id": str(note.id), "content": note.content} for note in notes
+    ]
+
+    categories = await Category.find_all().to_list()
+
+    return templates.TemplateResponse(
+        "index.html",
+        {
+            "request": request,
+            "notes": notes_for_template,
+            "categories": categories,  # Make sure to pass the categories again for the filter form
+        },
+    )

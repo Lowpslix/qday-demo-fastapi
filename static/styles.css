@@ -74,3 +74,11 @@ button:hover {
   margin-left: 10px;
   display: inline;
 }
+
+a h1 {
+  cursor: pointer; /* Changes the cursor to indicate it's clickable */
+}
+
+a {
+  text-decoration: none;
+}

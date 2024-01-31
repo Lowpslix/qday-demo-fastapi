@@ -7,7 +7,9 @@
     <title>GoodNotes</title>
   </head>
   <body>
-    <h1>🗒️ GoodNotes 🗒️</h1>
+    <a href="/">
+      <h1>🗒️ GoodNotes 🗒️</h1>
+    </a>
 
     <!-- Form for adding a new note -->
     <form action="/add-note" method="post">
@@ -15,13 +17,25 @@
       <input type="text" id="content" name="content" required />
 
       <label for="category">Category:</label>
-      <select id="category" name="category" required>
+      <select id="category" name="category_id" required>
         {% for category in categories %}
         <option value="{{ category.id }}">{{ category.name }}</option>
         {% endfor %}
       </select>
 
       <button type="submit">Add Note</button>
+    </form>
+
+    <!-- Category Filter Form -->
+    <form action="/filter" method="get">
+      <label for="filter-category">Filter by Category:</label>
+      <select id="filter-category" name="id" required>
+        <option value="">All Categories</option>
+        {% for category in categories %}
+        <option value="{{ category.id }}">{{ category.name }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit">Filter</button>
     </form>
 
     <!-- Existing notes -->
