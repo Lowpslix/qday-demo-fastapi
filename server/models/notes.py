@@ -24,6 +24,10 @@ class Category(Document):
         return v
 
 
+class UpdateCategory(BaseModel):
+    name: Optional[str]
+
+
 class Note(Document):
     content: str
     category: Link[Category]
@@ -39,7 +43,3 @@ class Note(Document):
                 "category": "productivity",
             }
         }
-
-
-class UpdateNote(BaseModel):
-    content: Optional[str]

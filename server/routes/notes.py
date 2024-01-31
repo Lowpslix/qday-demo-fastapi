@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query, Request, F
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, RedirectResponse
 
-from server.models.notes import Note, UpdateNote, Category
+from server.models.notes import Note, UpdateCategory, Category
 
 
 router = APIRouter()
@@ -24,6 +24,25 @@ async def home(request: Request) -> list[Note]:
         "index.html",
         {"request": request, "notes": notes_for_template, "categories": categories},
     )
+
+
+@router.put(
+    "/update-category/{id}",
+    response_description="Update category",
+)
+async def update_category(
+    updated_category: UpdateCategory, id: PydanticObjectId
+) -> Category:
+    category = await Category.get(id)
+    print(category, updated_category.name)
+
+    if not category:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"Category {id} not found"
+        )
+
+    await category.set(updated_category.dict(exclude_unset=True))
+    return category
 
 
 @router.post("/add-category", response_description="Add new category")
@@ -75,7 +94,7 @@ async def delete_note(id: PydanticObjectId) -> RedirectResponse:
     "/update/{id}", response_description="Update note", response_class=RedirectResponse
 )
 async def update_note(
-    updated_content: Annotated[str, Form(...)],
+    updated_content: Annotated[str, Form()],
     id: PydanticObjectId,
 ) -> RedirectResponse:
     note = await Note.get(id)
